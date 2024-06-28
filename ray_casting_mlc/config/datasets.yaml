@@ -1,0 +1,32 @@
+# ! MVL Datasets
+datasets:
+  mvl_root_challenge: /media/public_dataset/mvl_challenge
+  mvl_root: /media/public_dataset/mvl_dataset
+  zind_root: /media/public_dataset/ZInD/360_layout_challenge
+
+  hm3d_mvl:
+    dataset_name: hm3d_mvl
+    scene_list_dir: ${datasets.mvl_root}/hm3d_mvl/scene_lists
+    img_dir: ${datasets.mvl_root_challenge}/mvl_challenge_dataset/img
+    geometry_info_dir: ${datasets.mvl_root}/hm3d_mvl/geometry_info
+    labels_dir: ${datasets.mvl_root}/hm3d_mvl/labels/phi_coords
+    scene_list: ${datasets.hm3d_mvl.scene_list_dir}/scene_list__testing_set.json
+    resolution: [512, 1024]
+
+  mp3d_fpe_mvl:
+    scene_list_dir: ${datasets.mvl_root}/mp3d_fpe_mvl/scene_lists
+    dataset_name: mp3d_fpe_mvl
+    img_dir: ${datasets.mvl_root_challenge}/mvl_challenge_dataset/img
+    geometry_info_dir: ${datasets.mvl_root}/mp3d_fpe_mvl/geometry_info
+    labels_dir: ${datasets.mvl_root}/mp3d_fpe_mvl/labels/phi_coords
+    scene_list: ${datasets.mp3d_fpe_mvl.scene_list_dir}/scene_list__testing_set.json
+    resolution: [512, 1024]
+
+  zind_mvl:
+    scene_list_dir: ${datasets.zind_root}/scene_lists
+    dataset_name: zind_mvl
+    img_dir: ${datasets.zind_root}/img
+    geometry_info_dir: ${datasets.zind_root}/geometry_info
+    labels_dir: ${datasets.zind_root}/labels/layout_visible
+    scene_list: ${datasets.zind_mvl.scene_list_dir}/scene_list__testing_set.json
+    resolution: [512, 1024]

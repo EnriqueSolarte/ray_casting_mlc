@@ -1,0 +1,13 @@
+experiment_name: ${script}__${date}
+log_dir: ${get_hydra_dirname:}/logs/${experiment_name}
+
+hydra:
+  run:
+    dir: ${log_dir}
+
+script: ${hydra:job.name}
+date: ${now:%y%m%d}
+time: ${now:%H%M%S}
+hostname: ${get_hostname:}
+user: ${oc.env:USER}
+python: ${get_python_exe:}
