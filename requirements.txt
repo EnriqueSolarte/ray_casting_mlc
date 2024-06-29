@@ -4,6 +4,7 @@ plyfile
 pyquaternion
 GitPython
 PyYAML
+PyQt5
 omegaconf
 imageio
 scipy
@@ -14,3 +15,5 @@ pyransac3d
 scikit-image
 open3d
 hydra-core
+opencv-python-headless
+360_mlc @ git+https://github.com/EnriqueSolarte/360-mlc.git@e5e55db907600e811ff0ebf64a2ec63b67098719

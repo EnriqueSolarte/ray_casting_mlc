@@ -1,0 +1,74 @@
+ExponentialLR:
+  name: ExponentialLR
+  lr_decay_rate: 0.90
+
+Adam_optimizer:
+  name: Adam
+  lr: 0.00005
+  beta1: 0.9
+  weight_decay: 0.0
+
+cuda: 0
+seed: 594277
+model:
+  cuda: ${cuda}
+  ly_model: HorizonNetV2
+  ckpt: ${trained_models.hn_mp3d.ckpt}
+  seed: ${seed}
+  train: ${train}
+  test: ${test}
+  inference: ${inference_in_list}
+  loss: ${l1_loss}
+
+l1_loss:
+  module: layout_models.loss_utils.compute_L1_loss
+
+inference_in_list:
+  seed: ${seed}
+  batch_size: 5
+  num_workers: 4
+
+test:
+  seed: ${seed}
+  batch_size: 16
+  num_workers: 4
+  data: ${data_test}
+
+train:
+  epochs: 10
+  save_ckpt: True
+  seed: ${seed}
+  batch_size: 4
+  num_workers: 4
+  data: ${data_train}
+  optimizer: ${Adam_optimizer}
+  scheduler: ${ExponentialLR}
+  bn_momentum: 0
+  freeze_earlier_blocks: -1
+  save_every: -1
+
+data_train:
+  img_dir: ${datasets.hm3d_mvl.img_dir}
+  labels_dir: ${datasets.hm3d_mvl.labels_dir}
+  scene_list: ${datasets.hm3d_mvl.test_scene_list}
+  size: 100
+  seed: ${seed}
+  flip: True
+  rotate: True
+  gamma: True
+
+data_test:
+  img_dir: ${datasets.hm3d_mvl.img_dir}
+  labels_dir: ${datasets.hm3d_mvl.labels_dir}
+  scene_list: ${datasets.hm3d_mvl.test_scene_list}
+  size: 100
+  seed: ${seed}
+  flip: False
+  rotate: False
+  gamma: False
+
+defaults:
+  - general
+  - trained_models
+  - datasets
+  - _self_

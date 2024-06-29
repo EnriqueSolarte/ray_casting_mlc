@@ -1,0 +1,39 @@
+model:
+  cuda: ${cuda}
+  ly_model: HorizonNetV2
+  ckpt: ${trained_models.hn_mp3d.ckpt}
+  seed: ${seed}
+  inference:
+    batch_size: 4
+    num_workers: 4
+
+mlc:
+  name: mlc
+  label: mlc_label
+  std_kernel: [30, 10, 5]
+
+dataset: hm3d_mvl
+mvl_dataset:
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${datasets.${dataset}.labels_dir}
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.scene_list_dir}/scene_list__training_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}
+
+experiment_name: ${script}
+output_dir: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/${experiment_name}/${date}
+log_dir: ${output_dir}/logs
+
+defaults:
+  - general
+  - trained_models
+  - datasets
+  - horizon_net
+  - _self_
+
+hydra:
+  searchpath:
+    - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
