@@ -50,8 +50,8 @@ def main(cfg):
     # Create dir to save 360-MLC pseudo-labels
     create_directory(f"{cfg.output_dir}/label", delete_prev=True)
     create_directory(f"{cfg.output_dir}/vis", delete_prev=True)
-    output_dir = cfg.output_dir # expected path for 360-mlc
-    
+    output_dir = cfg.output_dir  # expected path for 360-mlc
+
     for idx, scene in enumerate(dt.list_scenes):
         logging.info(
             f"Processing scene: {scene} - {idx}: {idx/dt.list_scenes.__len__()*100:.2f}%"
@@ -60,10 +60,10 @@ def main(cfg):
         list_ly = dt.get_list_ly(scene_name=scene)
         # Estimate ly in the list of layouts
         hn.estimate_within_list_ly(model, list_ly)
-        
+
         for ly in tqdm(list_ly, desc="Creating MLC pseudo-labels"):
             create_and_save_mlc_labels(list_ly, ly, output_dir)
-    logging.warning("Finished script")
+    logging.warning("The script has finished successfully")
 
 
 if __name__ == '__main__':

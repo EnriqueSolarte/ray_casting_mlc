@@ -17,3 +17,5 @@ open3d
 hydra-core
 opencv-python-headless
 360_mlc @ git+https://github.com/EnriqueSolarte/360-mlc.git@e5e55db907600e811ff0ebf64a2ec63b67098719
+# torch==2.2.2
+# torchvision==0.17.2

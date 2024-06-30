@@ -42,12 +42,12 @@ def main(cfg):
 
         [np.save(f"{dir_phi_coords}/{ly.idx}", ly.phi_coord)
          for ly in list_ly]
-        
+
         xyz = np.hstack([ly.boundary_floor for ly in list_ly])
         xyz[1, :] = 0
         np.save(f"{dir_xyz}/{scene}", xyz)
-        
-    logging.warning("Finished script")
+
+    logging.warning("The script has finished successfully")
 
 
 if __name__ == '__main__':
