@@ -27,7 +27,8 @@ log_dir: ${output_dir}/logs
 pre_computed_data:
   dir_mlc: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_mlc/${dataset_code}/label
   dir_phi_coords: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_xyz/${dataset_code}/phi_coords
-  dir_xyz: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_xyz/${dataset_code}/xyz/
+  dir_xyz: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_xyz/${dataset_code}/xyz
+  dir_n_cycle_ray_cast: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/multi_cycle_ray_casting/${dataset_code}/ray_cast_xyz
   # dir_ray_cast_xyz:
 
 ray_casting_mlc:
@@ -52,6 +53,9 @@ mlc_phi_coord_data:
   module_name: ray_casting_mlc.utils.get_xyz_from_phi_coords
   kwargs:
     data_dir: ${pre_computed_data.dir_mlc}
+
+
+
 
 defaults:
   - general
