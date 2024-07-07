@@ -1,0 +1,93 @@
+# * Setting directory paths
+exp_dir: ${oc.env:RAY_CASTING_MLC_ROOT}/../../train_results/${script}/${dataset_code}
+log_dir: ${exp_dir}/${date}__${seed}__${wdL1.kwargs.kappa}__${wdL1.kwargs.d_min}/
+
+# * Setting Horizon Net model
+cuda: 0
+seed: 11111
+model:
+  cuda: ${cuda}
+  ly_model: HorizonNetV2
+  ckpt: ${trained_models.${ckpt}.ckpt}
+  seed: ${seed}
+  train: ${train}
+  test: ${test}
+  loss: ${wdL1}
+
+# * Loss function
+wdL1: 
+  module: ray_casting_mlc.train.train_horizon_net.utils.weighed_distance_loss
+  kwargs:
+    kappa: 1
+    d_min: 0.5
+
+wdL1_fine_tuning_parameters:
+  hm3d_mvl: 
+    kappa: 1.1
+    d_min: 1.0
+  mp3d_fpe_mvl:
+    kappa: ??
+    d_min: ??
+  zind_mvl: 
+    kappa: 20
+    d_min: 1.0
+
+
+# * Data loaders
+test:
+  seed: ${seed}
+  batch_size: 10
+  num_workers: 4
+  data: ${mvl_dataset_test}
+
+train:
+  epochs: 20
+  save_ckpt: True
+  seed: ${seed}
+  batch_size: 4
+  num_workers: 4
+  data: ${mvl_dataset_train}
+  optimizer: ${Adam_optimizer}
+  scheduler: ${ExponentialLR}
+  bn_momentum: 0
+  freeze_earlier_blocks: -1
+  save_every: -1
+
+# * setting datasets
+dataset: hm3d_mvl #from datasets.yaml
+ckpt: hn_mp3d #from trained_models.yaml
+dataset_code: ${ckpt}__${dataset}
+ray_cast_labels_dir: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/sampling_ray_casting_pseudo_labels
+mvl_dataset_train:
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${ray_cast_labels_dir}/${dataset_code}/ray_cast_label
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.scene_list_dir}/scene_list__training_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}
+  flip: true
+  rotate: true
+  gamma: true
+  
+mvl_dataset_test:
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${datasets.${dataset}.labels_dir}
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.scene_list_dir}/scene_list__testing_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}
+
+defaults:
+  - general
+  - trained_models
+  - datasets
+  - horizon_net
+  - _self_
+
+hydra:
+  searchpath:
+    - ${oc.env:RAY_CASTING_MLC_CFG_DIR}

@@ -18,6 +18,9 @@ def get_ray_directions(number_rays=1024, fov=360):
 
 
 class RaysTracer:
+    def set_scale(self, scale=1):
+        self.scale = scale
+
     def __init__(self, cfg):
         # set attributes in the class
         [setattr(self, k, v) for k, v in cfg.items()]
@@ -26,6 +29,7 @@ class RaysTracer:
             f"cuda:{self.cuda}" if torch.cuda.is_available() else "cpu")
         logging.info(f"RaysTracer @ Device: {self.device}")
         self.set_number_of_rays(self.number_rays, self.fov)
+        self.set_scale()
 
     def set_number_of_rays(self, number_rays=1024, fov=360):
         self.dir_rays, self.norm_rays, self.theta_rays = get_ray_directions(
@@ -63,8 +67,8 @@ class RaysTracer:
         proj = self.dir_rays.T @ xyz
         n_proj = self.norm_rays.T @ xyz
 
-        neighbors_mask = abs(n_proj) < self.max_norm_dist
-        range_mask = (proj > self.min_depth) & (proj < self.max_depth)
+        neighbors_mask = abs(n_proj) < self.max_norm_dist * self.scale
+        range_mask = (proj > self.min_depth* self.scale) & (proj < self.max_depth * self.scale)
         mask = neighbors_mask & range_mask
 
         proj_mask = proj * mask

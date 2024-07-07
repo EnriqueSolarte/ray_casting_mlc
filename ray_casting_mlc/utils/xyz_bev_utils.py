@@ -21,7 +21,7 @@ def get_xyz_from_phi_coords(list_ly: List[Layout], data_dir):
 
 
 def get_xyz_filtering_by_distance(list_ly: List[Layout], data_dir, max_distance):
-    pass
+    raise NotImplementedError("This function is not implemented yet.")
 
 
 def compute_ceiling_height(list_ly):
