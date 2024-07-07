@@ -27,29 +27,30 @@ from geometry_perception_utils.image_utils import COLOR_BLUE, COLOR_GREEN, COLOR
 from imageio.v2 import imwrite
 
 
-def sampling_std_ray_casting(ray_tracer: RaysTracer, xyz_cc):
+def sampling_ray_casting_pseudo_label(ray_tracer: RaysTracer, xyz_cc, all_xyz_cc, xyz_est):
     proj_mask, mask = ray_tracer.ray_casting(xyz_cc)
-    # sampling std
-    ps_std = []
-    [ps_std.append(np.std(x[m].cpu().numpy()))
-     for x, m in zip(proj_mask, mask)]
-    return np.array(ps_std)
-
-
-def sampling_ray_casting_pseudo_label(ray_tracer: RaysTracer, xyz_cc, xyz_est):
-    proj_mask, mask = ray_tracer.ray_casting(xyz_cc)
-    # sampling min
+    # sampling min point on ray vectors
     proj_mask[~mask] = torch.tensor(np.inf)
     proj_aggregation = torch.min(proj_mask, dim=1)[0]
-    traced_rays = torch.nan_to_num(proj_aggregation) * ray_tracer.dir_rays
+    proj_aggregation[proj_aggregation == np.inf] = torch.tensor(np.nan)
+    traced_rays = (torch.nan_to_num(proj_aggregation)
+                   * ray_tracer.dir_rays).cpu().numpy()
 
-    mask_0 = torch.norm(traced_rays, dim=0) < ray_tracer.min_depth
-    mask_1 = torch.nan_to_num(proj_aggregation, -1) < 0
-    mask = (mask_0 & mask_1).cpu().numpy()
+    mask_zero = np.linalg.norm(
+        traced_rays, axis=0) <= ray_tracer.min_depth * ray_tracer.scale
+    ps_ray = traced_rays
+    ps_ray[:, mask_zero] = xyz_est[:, mask_zero]
+    assert np.all(np.linalg.norm(ps_ray, axis=0) > 0)
 
-    ps_ray = traced_rays.cpu().numpy()
-    ps_ray[:, mask] = xyz_est[:, mask]
-    return ps_ray
+    # computing STD
+    # dist_xyz = np.linalg.norm(all_xyz_cc, axis=0)
+    # all_xyz_cc = all_xyz_cc[:, dist_xyz < 3*np.mean(dist_xyz)]
+    proj_mask, mask = ray_tracer.ray_casting(all_xyz_cc)
+    ps_std = [x[m].cpu().numpy()
+              for x, m in zip(proj_mask, mask)]
+    std = np.nan_to_num(np.array([np.std(x) for x in ps_std]))
+
+    return ps_ray, std
 
 
 @hydra.main(version_base=None,
@@ -75,6 +76,7 @@ def main(cfg):
             f"Processing scene: {scene} - {idx}: {idx/dt.list_scenes.__len__()*100:.2f}%"
         )
         list_ly = dt.get_list_ly(scene_name=scene)
+        ray_tracer.set_scale(list_ly[0].scale)
 
         # load pre-computed data
         all_xyz_wc = np.load(f"{cfg.pre_computed_data.dir_xyz}/{scene}.npy")
@@ -100,13 +102,12 @@ def main(cfg):
             all_xyz_cc = pose[:3, :] @ extend_array_to_homogeneous(all_xyz_wc)
 
             # * Floor boundary in camera coordinates
-            floor_cc = pose[:3, :] @ extend_array_to_homogeneous(ly.boundary_floor)
+            floor_cc = pose[:3,
+                            :] @ extend_array_to_homogeneous(ly.boundary_floor)
             floor_cc[1, :] = 0
 
-            xyz_cc = sampling_ray_casting_pseudo_label(
-                ray_tracer, xyz_cc, floor_cc)
-
-            std = sampling_std_ray_casting(ray_tracer, all_xyz_cc)
+            xyz_cc, std = sampling_ray_casting_pseudo_label(
+                ray_tracer, xyz_cc, all_xyz_cc, floor_cc)
 
             # * Floor boundary
             xyz_cc[1, :] = ly.camera_height

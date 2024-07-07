@@ -32,7 +32,7 @@ test:
   seed: ${seed}
   batch_size: 16
   num_workers: 4
-  data: ${data_test}
+  data: ${mvl_dataset_test}
 
 train:
   epochs: 10
@@ -40,28 +40,28 @@ train:
   seed: ${seed}
   batch_size: 4
   num_workers: 4
-  data: ${data_train}
+  data: ${mvl_dataset_train}
   optimizer: ${Adam_optimizer}
   scheduler: ${ExponentialLR}
   bn_momentum: 0
   freeze_earlier_blocks: -1
   save_every: -1
 
-data_train:
-  img_dir: ${datasets.hm3d_mvl.img_dir}
-  labels_dir: ${datasets.hm3d_mvl.labels_dir}
-  scene_list: ${datasets.hm3d_mvl.test_scene_list}
-  size: 100
+mvl_dataset_train:
+  img_dir: TBD
+  labels_dir: TBD
+  scene_list: TBD
+  size: -1
   seed: ${seed}
   flip: True
   rotate: True
   gamma: True
 
-data_test:
-  img_dir: ${datasets.hm3d_mvl.img_dir}
-  labels_dir: ${datasets.hm3d_mvl.labels_dir}
-  scene_list: ${datasets.hm3d_mvl.test_scene_list}
-  size: 100
+mvl_dataset_test:
+  img_dir: TBD
+  labels_dir: TBD
+  scene_list: TBD
+  size: -1
   seed: ${seed}
   flip: False
   rotate: False

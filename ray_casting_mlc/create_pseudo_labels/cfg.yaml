@@ -7,7 +7,7 @@ model:
     batch_size: 4
     num_workers: 4
 
-dataset: hm3d_mvl #from datasets.yaml
+dataset: mp3d_fpe_mvl #from datasets.yaml
 ckpt: hn_mp3d #from trained_models.yaml
 dataset_code: ${ckpt}__${dataset}
 mvl_dataset:
@@ -38,7 +38,7 @@ ray_casting_mlc:
     fov: 360
     max_norm_dist: 0.01
     max_depth: 20
-    min_depth: 0
+    min_depth: 0.1
     cuda: ${cuda}
   initial_xyz: ${mlc_phi_coord_data}
   # initial_xyz: ${filter_dist_data}
@@ -53,9 +53,6 @@ mlc_phi_coord_data:
   module_name: ray_casting_mlc.utils.get_xyz_from_phi_coords
   kwargs:
     data_dir: ${pre_computed_data.dir_mlc}
-
-
-
 
 defaults:
   - general
