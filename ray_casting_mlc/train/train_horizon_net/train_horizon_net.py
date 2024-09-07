@@ -19,7 +19,7 @@ from functools import partial
             config_name="cfg")
 def main(cfg):
     logging.warning("Starting training HorizonNet")
-    save_cfg(cfg, save_list_scripts=[__file__], resolve=True)
+    # save_cfg(cfg, save_list_scripts=[__file__], resolve=True)
 
     data_loader_train = hn.DataLoader(
         MVLDataloaderPhiCoords(cfg.train),

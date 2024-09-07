@@ -3,7 +3,7 @@ exp_dir: ${oc.env:RAY_CASTING_MLC_ROOT}/../../train_results/${script}/${dataset_
 log_dir: ${exp_dir}/${date}__${seed}__${wdL1.kwargs.kappa}__${wdL1.kwargs.d_min}/
 
 # * Setting Horizon Net model
-cuda: 0
+cuda: cpu
 seed: 11111
 model:
   cuda: ${cuda}
@@ -26,8 +26,8 @@ wdL1_fine_tuning_parameters:
     kappa: 1.1
     d_min: 1.0
   mp3d_fpe_mvl:
-    kappa: ??
-    d_min: ??
+    kappa: 1.0
+    d_min: 0.5
   zind_mvl: 
     kappa: 20
     d_min: 1.0
