@@ -1,6 +1,3 @@
 [submodule "ray_casting_mlc/models/HorizonNet"]
 	path = ray_casting_mlc/models/HorizonNet
 	url = git@github.com:EnriqueSolarte/HorizonNet.git
-[submodule "ray_casting_mlc/models/LGT-Net"]
-	path = ray_casting_mlc/models/LGT-Net
-	url = git@github.com:EnriqueSolarte/LGT-Net.git
