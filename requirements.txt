@@ -10,12 +10,14 @@ imageio
 scipy
 vispy
 matplotlib
-shapely==2.0.1
 pyransac3d
 scikit-image
 open3d
 hydra-core
 opencv-python-headless
 360_mlc @ git+https://github.com/EnriqueSolarte/360-mlc.git@e5e55db907600e811ff0ebf64a2ec63b67098719
+geometry-perception-utils-dev @ git+https://github.com/EnriqueSolarte/geometry_perception_utils.git@570039d48711ce37577cde4776f99ce927fa90eb
+shapely==2.0.6
+# multiview-datasets @ git+git@github.com:EnriqueSolarte/multiview-datasets.git@d7b100382d0c6cbafb599092ce5c5440b26fc423
 # torch==2.2.2
 # torchvision==0.17.2
