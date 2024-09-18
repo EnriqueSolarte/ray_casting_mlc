@@ -5,22 +5,23 @@ from typing import Callable, Optional, List
 from geometry_perception_utils.io_utils import get_abs_path
 from geometry_perception_utils.vispy_utils import plot_list_pcl
 import logging
-import layout_models
 from torch import nn
-from layout_models.models.LGTNet.models.lgt_net import LGT_Net
-from layout_models.models.LGTNet.utils.misc import tensor2np_d, tensor2np
-from layout_models.models.LGTNet.utils.conversion import depth2xyz, uv2lonlat, uv2pixel, xyz2lonlat
-from layout_models.models.LGTNet.utils.boundary import corners2boundaries
-from layout_models.models.LGTNet.visualization.boundary import draw_boundaries
+from ray_casting_mlc.models.LGTNet.models.lgt_net import LGT_Net
+from ray_casting_mlc.models.LGTNet.utils.misc import tensor2np_d, tensor2np
+from ray_casting_mlc.models.LGTNet.utils.conversion import depth2xyz, uv2lonlat, uv2pixel, xyz2lonlat
+from ray_casting_mlc.models.LGTNet.utils.boundary import corners2boundaries
+from ray_casting_mlc.models.LGTNet.visualization.boundary import draw_boundaries
 import logging
 import os
 from multiview_datasets.data_structure.layout import Layout
-from layout_models.dataloaders.image_idx_dataloader import ImageIdxDataloader
+from ray_casting_mlc.dataloaders.image_idx_dataloader import ImageIdxDataloader
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 from multiview_datasets.mvl_datasets import load_mvl_dataset
 import numpy as np
 from imageio.v2 import imwrite
+import torch.nn.functional as F
+from ray_casting_mlc.utils.eval_utils import eval_2d3d_iuo_from_tensors
 
 
 class WrapperLGTNet:
@@ -30,6 +31,8 @@ class WrapperLGTNet:
     loss: Optional[Callable] = None
 
     def __init__(self, cfg):
+        assert cfg.ly_model == "LGTNet", "Model is not LGTNet"
+
         # Set parameters in the class
         [setattr(self, key, val) for key, val in cfg.items()]
         # ! Setting cuda-device
@@ -116,7 +119,15 @@ def set_for_training(model: WrapperLGTNet, optimizer=None, scheduler=None):
     logging.info("LGTNet ready for training")
 
 
-def train_loop(model: WrapperLGTNet, dataloader, epoch=0):
+def weighed_distance_loss(xyz_est, xyz_ref, std, kappa, d_min, eps=1E-6):
+    d_xz = torch.norm(xyz_ref[:, [0, 2]], dim=1)
+    d_xz_est = torch.norm(xyz_est[:, [0, 2]], dim=1)
+    w_cam = torch.exp(kappa * (d_xz-d_min))
+    w = w_cam  / (std[0]**2 + eps)
+    return F.l1_loss(d_xz_est * w, d_xz * w)
+
+
+def train_loop(model: WrapperLGTNet, dataloader, loss_function: Callable):
     # Setting optimizer and scheduler if not set
     assert model.optimizer is not None, "Optimizer not set"
     assert model.lr_scheduler is not None, "Scheduler not set"
@@ -124,46 +135,78 @@ def train_loop(model: WrapperLGTNet, dataloader, epoch=0):
     model.net.train()
 
     iterator_train = iter(dataloader)
-    data_eval = {"loss": [], 'lr': []}
-    for _ in trange(len(dataloader), desc=f"Training HorizonNet - Epoch:{epoch} "):
+    results_train = {'loss': []}
+    for _ in trange(len(dataloader), desc=f"Training  "):
         dt = next(iterator_train)
-        x, y = dt["x"], dt["y"]
+        x, (xyz_ceiling, xyz_floor, std, fn) = dt["x"], dt["y"]
 
         est = model.net(x.to(model.device))
 
         est_floor_xyz = depth2xyz(est['depth'])
 
-        est_ceil_xyz = est_floor_xyz.clone()
-        est_ceil_xyz[..., 1] = -est['ratio']
+        # est_ceil_xyz = est_floor_xyz.clone()
+        # est_ceil_xyz[..., 1] = -est['ratio']
+        # # xyz_ = y[0][0][:3, :].numpy()
+        # # _xyz = est_floor_xyz[0].detach().cpu().numpy().T
+        # # est_phi_coords_floor = xyz2lonlat(est_floor_xyz)[..., -1:]
+        # # est_phi_coords_ceil = xyz2lonlat(est_ceil_xyz)[..., -1:]
 
-        est_phi_coords_floor = xyz2lonlat(est_floor_xyz)[..., -1:]
-        est_phi_coords_ceil = xyz2lonlat(est_ceil_xyz)[..., -1:]
-        pass
+        loss = loss_function(est_floor_xyz.transpose(
+            1, 2), xyz_floor.to(model.device), std[1].to(model.device))
+
+        if np.isnan(loss.item()):
+            logging.error(f"Loss is nan @ {fn}")
+            raise ValueError(f"Loss is nan @ {fn}")
+
+        model.optimizer.zero_grad()
+        results_train['loss'].append(loss.item())
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.net.parameters(),
+                                 3.0,
+                                 norm_type="inf")
+        model.optimizer.step()
+
+    model.lr_scheduler.step()
+    results_train['loss'] = np.mean(results_train['loss'])
+    logging.info(f"Loss: {results_train['loss']}")
+    return results_train
 
 
-def test_loop(model: WrapperLGTNet, dataloader, epoch=0):
+def test_loop(model, dataloader, log_results=True):
+
     model.net.eval()
     iterator = iter(dataloader)
 
-    data_eval = {"loss": [], "2DIoU": [], "3DIoU": []}
-    for _ in trange(len(iterator), desc=f"Test loop - Epoch:{epoch}"):
+    results_test = {"2DIoU": [], "3DIoU": []}
+    for _ in trange(len(dataloader), desc=f"Testing loop for HorizonNet"):
         dt = next(iterator)
-        x, y_bon_ref = dt["x"], dt["y"]
+        x, (y_bon_ref, std, fn) = dt["x"], dt["y"]
 
         with torch.no_grad():
-            y_bon_est, _ = model.net(x.to(model.device))
-            loss = model.loss(y_bon_est.to(model.device),
-                              y_bon_ref.to(model.device))
+            est = model.net(x.to(model.device))
 
-            data_eval["loss"].append(loss.item())
-            for gt, est in zip(y_bon_ref.cpu().numpy(),
-                               y_bon_est.cpu().numpy()):
-                eval_2d3d_iuo_from_tensors(
-                    est[None],
-                    gt[None],
-                    data_eval,
-                )
-    return data_eval
+            est_floor_xyz = depth2xyz(est['depth'])
+            est_ceil_xyz = est_floor_xyz.clone()
+            est_ceil_xyz[..., 1] = -est['ratio']
+
+            est_phi_coords_floor = xyz2lonlat(est_floor_xyz)[..., -1:]
+            est_phi_coords_ceil = xyz2lonlat(est_ceil_xyz)[..., -1:]
+
+            y_bon_est = torch.cat(
+                [est_phi_coords_ceil, est_phi_coords_floor], dim=-1).transpose(1, 2)
+            [eval_2d3d_iuo_from_tensors(
+                est[None],
+                gt[None],
+                results_test,
+            ) for gt, est in zip(y_bon_ref.detach().cpu().numpy(), y_bon_est.detach().cpu().numpy())]
+
+    results_test['2DIoU'] = np.mean(results_test['2DIoU'])
+    results_test['3DIoU'] = np.mean(results_test['3DIoU'])
+
+    if log_results:
+        logging.info(f"2DIoU: {results_test['2DIoU']}")
+        logging.info(f"3DIoU: {results_test['3DIoU']}")
+    return results_test
 
 
 @torch.no_grad()

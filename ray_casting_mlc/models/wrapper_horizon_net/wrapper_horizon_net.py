@@ -14,6 +14,7 @@ from tqdm import tqdm
 from multiview_datasets.data_structure.layout import Layout
 from tqdm import tqdm, trange
 from collections import OrderedDict
+import torch.nn.functional as F
 
 
 class WrapperHorizonNet:
@@ -23,6 +24,7 @@ class WrapperHorizonNet:
     loss: Optional[Callable] = None
 
     def __init__(self, cfg):
+        assert cfg.ly_model == "HorizonNet", "Model is not HorizonNet"
         # Set parameters in the class
         [setattr(self, key, val) for key, val in cfg.items()]
         # ! Setting cuda-device
@@ -38,7 +40,7 @@ def load_model(ckpt, model: WrapperHorizonNet):
     Loads pre-trained model weights from the checkpoint file specified in the config file
     Args:
         ckpt: saved check point 
-        model (WrapperHorizonNetV2): model instance
+        model (WrapperHorizonNet): model instance
     """
     assert os.path.isfile(ckpt), f"Not found {ckpt}"
     logging.info("Loading HorizonNet model...")
@@ -111,32 +113,94 @@ def set_for_training(model: WrapperHorizonNet, optimizer=None, scheduler=None):
     logging.info("HorizonNet ready for training")
 
 
-def train_loop(model: WrapperHorizonNet, dataloader, epoch=0):
-    # Setting optimizer and scheduler if not set
-    assert model.optimizer is not None, "Optimizer not set"
-    assert model.lr_scheduler is not None, "Scheduler not set"
+def save_model(model, ckpt_path):
+    # ! Saving the current model
+    state_dict = OrderedDict({
+        "kwargs": {
+            "backbone": model.net.backbone,
+            "use_rnn": model.net.use_rnn,
+        },
+        "state_dict": model.net.state_dict(),
+    })
+
+    torch.save(state_dict, ckpt_path)
+    logging.info(f"Saved model: {ckpt_path}")
+
+
+def loss_l1(y_est, y_ref, std, eps=1E-6):
+    return F.l1_loss(y_est, y_ref)
+
+
+def weighed_loss(y_est, y_ref, std, eps=1E-6):
+    sigma = (std**2 + eps)
+    w = 1 / (sigma)
+    return F.l1_loss(y_est * w, y_ref * w)
+
+
+def weighed_distance_loss(y_est, y_ref, std, kappa, d_min, eps=1E-6):
+    # This is because std was computed in Euclidean space
+    # We need to project into image domain.
+    std_phi = torch.sin(torch.abs(y_ref)) * std
+    # This is to normalize the angle to be between 0 and 1
+    phi_norm = torch.abs(y_ref*2/np.pi)
+    # Note that kappa is negative because the farthest geometries
+    # are defined close to the horizon (the middle of pano image).
+    w_cam = torch.exp(-kappa * (phi_norm-d_min))
+    w = w_cam / (std_phi**2 + eps)
+    return F.l1_loss(y_est * w, y_ref * w)
+
+
+def test_loop(model, dataloader, log_results=True):
+
+    model.net.eval()
+    iterator = iter(dataloader)
+
+    results_test = {"2DIoU": [], "3DIoU": []}
+    for _ in trange(len(dataloader), desc=f"Testing loop for HorizonNet"):
+        dt = next(iterator)
+        x, (y_bon_ref, std, fn) = dt["x"], dt["y"]
+
+        with torch.no_grad():
+            y_bon_est, _ = model.net(x.to(model.device))
+
+            [eval_2d3d_iuo_from_tensors(
+                est[None],
+                gt[None],
+                results_test,
+            ) for gt, est in zip(y_bon_ref.detach().cpu().numpy(), y_bon_est.detach().cpu().numpy())]
+
+    results_test['2DIoU'] = np.mean(results_test['2DIoU'])
+    results_test['3DIoU'] = np.mean(results_test['3DIoU'])
+
+    if log_results:
+        logging.info(f"2DIoU: {results_test['2DIoU']}")
+        logging.info(f"3DIoU: {results_test['3DIoU']}")
+    return results_test
+
+
+def train_loop(model, dataloader, loss_fn=weighed_distance_loss):
 
     model.net.train()
-
     iterator_train = iter(dataloader)
-    data_eval = {"loss": [], 'lr': []}
-    for _ in trange(len(dataloader), desc=f"Training HorizonNet - Epoch:{epoch} "):
+    results_train = {'loss': []}
+    for _ in trange(len(dataloader), desc=f"Training loop for HorizonNet"):
 
-        # * dataloader returns (x, y_bon_ref, std, cam_dist)
         dt = next(iterator_train)
-        x, y_bon_ref = dt["x"], dt["y"]
+        x, (y_bon_ref, std, fn) = dt["x"], dt["y"]
 
+        std = std
         y_bon_est, _ = model.net(x.to(model.device))
-        loss = model.loss(y_bon_est.to(model.device),
-                          y_bon_ref.to(model.device))
 
-        if y_bon_est is np.nan:
-            raise ValueError("Nan value")
+        loss = loss_fn(y_bon_est.to(model.device),
+                       y_bon_ref.to(model.device),
+                       std.to(model.device),
+                       )
+        if np.isnan(loss.item()):
+            logging.error(f"Loss is nan @ {fn}")
+            raise ValueError(f"Loss is nan @ {fn}")
 
-        data_eval["loss"].append(loss.item())
-
-        # back-prop
         model.optimizer.zero_grad()
+        results_train['loss'].append(loss.item())
         loss.backward()
         nn.utils.clip_grad_norm_(model.net.parameters(),
                                  3.0,
@@ -144,34 +208,9 @@ def train_loop(model: WrapperHorizonNet, dataloader, epoch=0):
         model.optimizer.step()
 
     model.lr_scheduler.step()
-    lr = model.lr_scheduler.get_last_lr()[0]
-    data_eval["lr"].append(lr)
-    return data_eval
-
-
-def test_loop(model: WrapperHorizonNet, dataloader, epoch=0):
-    model.net.eval()
-    iterator = iter(dataloader)
-
-    data_eval = {"loss": [], "2DIoU": [], "3DIoU": []}
-    for _ in trange(len(iterator), desc=f"Test loop - Epoch:{epoch}"):
-        dt = next(iterator)
-        x, y_bon_ref = dt["x"], dt["y"]
-
-        with torch.no_grad():
-            y_bon_est, _ = model.net(x.to(model.device))
-            loss = model.loss(y_bon_est.to(model.device),
-                              y_bon_ref.to(model.device))
-
-            data_eval["loss"].append(loss.item())
-            for gt, est in zip(y_bon_ref.cpu().numpy(),
-                               y_bon_est.cpu().numpy()):
-                eval_2d3d_iuo_from_tensors(
-                    est[None],
-                    gt[None],
-                    data_eval,
-                )
-    return data_eval
+    results_train['loss'] = np.mean(results_train['loss'])
+    logging.info(f"Loss: {results_train['loss']}")
+    return results_train
 
 
 def estimate_within_list_ly(model: WrapperHorizonNet, list_ly: List[Layout]):
@@ -203,17 +242,3 @@ def estimate_within_list_ly(model: WrapperHorizonNet, list_ly: List[Layout]):
     [ly.set_phi_coords(phi_coords=evaluated_data[ly.idx])
         for ly in list_ly
      ]
-
-
-def save_model(model, ckpt_path):
-    # ! Saving the current model
-    state_dict = OrderedDict({
-        "kwargs": {
-            "backbone": model.net.backbone,
-            "use_rnn": model.net.use_rnn,
-        },
-        "state_dict": model.net.state_dict(),
-    })
-
-    torch.save(state_dict, ckpt_path)
-    logging.info(f"Saved model: {ckpt_path}")
