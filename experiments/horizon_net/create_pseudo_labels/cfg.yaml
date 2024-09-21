@@ -1,16 +1,26 @@
+# *****************************************************************************
+# Usual custom configuration inputs
+cuda: 0
+seed: 1232
+ckpt: hn_mp3d
+dataset: hm3d_mvl
+pre_computed_data_dir: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
+dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
+dir_datasets: ${oc.env:HOME}/ray_casting_mlc_data/mvl_datasets
+# *****************************************************************************
+
 defaults:
   - general
   - trained_models
   - datasets
-  - horizon_net
   - _self_
 
 hydra:
   searchpath:
     - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
 
-
 model:
+  device: cuda:${cuda}
   cuda: ${cuda}
   ly_model: HorizonNet
   ckpt: ${trained_models.${ckpt}.ckpt}
@@ -19,30 +29,25 @@ model:
     batch_size: 4
     num_workers: 4
 
-dataset: mp3d_fpe_mvl #from datasets.yaml
-ckpt: hn_mp3d #from trained_models.yaml
 dataset_code: ${ckpt}__${dataset}
 mvl_dataset:
   dataset_name: ${dataset}
   img_dir: ${datasets.${dataset}.img_dir}
   labels_dir: ${datasets.${dataset}.labels_dir}
   geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
-  scene_list: ${datasets.${dataset}.scene_list_dir}/scene_list__training_set.json
+  scene_list: ${datasets.${dataset}.dir}/scene_list__training_set.json
   size: -1
   resolution: ${datasets.${dataset}.resolution}
   seed: ${seed}
 
-experiment_name: ${script}
-output_dir: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/${experiment_name}/${dataset_code}
+output_dir: ${pre_computed_data_dir}/${script}/${dataset_code}
 log_dir: ${output_dir}/logs
-
 pre_computed_data:
-  dir_mlc: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_mlc/${dataset_code}/label
-  dir_phi_coords: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_xyz/${dataset_code}/phi_coords
-  dir_xyz: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/pre_compute_xyz/${dataset_code}/xyz
-  dir_n_cycle_ray_cast: /media/Pluto/kike/ray_casting_mlc_ws/pre_computed_data/multi_cycle_ray_casting/${dataset_code}/ray_cast_xyz
-  # dir_ray_cast_xyz:
-
+  dir_mlc: ${pre_computed_data_dir}/pre_compute_mlc/${dataset_code}/label
+  dir_phi_coords: ${pre_computed_data_dir}/pre_compute_xyz/${dataset_code}/phi_coords
+  dir_xyz: ${pre_computed_data_dir}/pre_compute_xyz/${dataset_code}/xyz
+  dir_n_cycle_ray_cast: ${pre_computed_data_dir}/multi_cycle_ray_casting/${dataset_code}/ray_cast_xyz
+  
 ray_casting_mlc:
   ray_tracer:
     cycles: 15

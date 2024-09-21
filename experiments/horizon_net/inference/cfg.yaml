@@ -1,3 +1,15 @@
+# *****************************************************************************
+# Usual custom configuration inputs
+cuda: 0
+seed: 1232
+ckpt: hn_mp3d
+dataset: hm3d_mvl
+pre_computed_data_dir: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
+dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
+dir_datasets: ${oc.env:HOME}//ray_casting_mlc_data/mvl_datasets
+# *****************************************************************************
+
+
 defaults:
   - general
   - trained_models
@@ -9,21 +21,19 @@ hydra:
     - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
 
 log_dir: ${get_hydra_dirname:}/logs/${date}
-dir_trained_models: /media/q200/models_weights/layout_models
-dir_datasets: /media/datasets/mvl_datasets
-dataset: hm3d_mvl
-ckpt: hn_mp3d
 
-cuda: 0
-seed: 240788
 model:
   seed: ${seed}
   device: cuda:${model.cuda}
   cuda: ${cuda}
   ly_model: HorizonNet
   ckpt: ${trained_models.${ckpt}.ckpt}
-  inference: ${inference_lys}
-  
+  inference: 
+    seed: ${seed}
+    batch_size: 5
+    num_workers: 4
+    data: ${mvl_dataset}
+
 mvl_dataset:
   dataset_name: ${dataset}
   img_dir: ${datasets.${dataset}.img_dir}
@@ -33,9 +43,3 @@ mvl_dataset:
   size: -1
   resolution: ${datasets.${dataset}.resolution}
   seed: ${seed}
-
-inference_lys:
-  seed: ${seed}
-  batch_size: 5
-  num_workers: 4
-  data: ${mvl_dataset}
