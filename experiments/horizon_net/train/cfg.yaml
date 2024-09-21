@@ -1,0 +1,102 @@
+defaults:
+  - general
+  - trained_models
+  - datasets
+  - horizon_net
+  - _self_
+  
+hydra:
+  searchpath:
+    - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
+
+
+# * Settings Directories
+dir_trained_models: /media/q200/models_weights/layout_models
+dir_datasets: /media/datasets/mvl_datasets
+dir_ws: /media/q200/kike/ray_casting_mlc_ws
+dir_exp: ${dir_ws}/train_results/${script}_test/${dataset_code}
+dir_ray_cast_labels: ${dir_ws}/pre_computed_data/sampling_ray_casting_pseudo_labels
+
+# * Setting experiment
+dataset: hm3d_mvl #from datasets.yaml
+ckpt: hn_mp3d #from trained_models.yaml
+dataset_code: ${ckpt}__${dataset}
+log_dir: ${dir_exp}/${date}_${time}__${wdL1.kwargs.kappa}_${wdL1.kwargs.d_min}__${seed}
+
+# * Setting Horizon Net model
+cuda: 0
+seed: ${opt_params.${dataset}.seed}
+model:
+  train: ${settings.train}
+  test: ${settings.test}
+  loss: ${wdL1}
+
+
+# * Loss function
+wdL1: 
+  module: ray_casting_mlc.models.wrapper_horizon_net.wrapper_horizon_net.weighed_distance_loss
+  kwargs: 
+    kappa: ${opt_params.${dataset}.kappa}
+    d_min: ${opt_params.${dataset}.d_min}
+
+   
+opt_params:
+  hm3d_mvl:
+    seed: 11111
+    kappa: 1.1
+    d_min: 1.0
+  mp3d_fpe_mvl:
+    seed: 240788
+    kappa: 0.5
+    d_min: 1.0
+  zind_mvl:
+    seed: 300790 
+    kappa: 10.0
+    d_min: 0.5
+
+
+# * Settings
+settings:
+  test:
+    seed: ${seed}
+    batch_size: 10
+    num_workers: 4
+    dataset: ${mvl_dataset_test}
+
+  train:
+    epochs: 20
+    save_ckpt: True
+    seed: ${seed}
+    batch_size: 4
+    num_workers: 4
+    dataset: ${mvl_dataset_train}
+    optimizer: ${Adam_optimizer}
+    scheduler: ${ExponentialLR}
+    bn_momentum: 0
+    freeze_earlier_blocks: -1
+    save_every: -1
+
+mvl_dataset_train:
+  dataloader: ray_casting_mlc.dataloaders.mvl_dataloader.MVLDataloaderPhiCoords
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${dir_ray_cast_labels}/${dataset_code}/ray_cast_label
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.dir}/scene_list__training_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}
+  flip: True
+  rotate: True
+  gamma: True
+  
+mvl_dataset_test:
+  dataloader: ray_casting_mlc.dataloaders.mvl_dataloader.MVLDataloaderPhiCoords
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${datasets.${dataset}.labels_dir}
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.dir}/scene_list__testing_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}

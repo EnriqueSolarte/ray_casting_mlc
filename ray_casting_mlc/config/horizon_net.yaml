@@ -11,64 +11,17 @@ Adam_optimizer:
 cuda: 0
 seed: 594277
 model:
+  device: cuda:${model.cuda}
   cuda: ${cuda}
-  ly_model: HorizonNetV2
-  ckpt: ${trained_models.hn_mp3d.ckpt}
+  ly_model: HorizonNet
+  ckpt: ${trained_models.${ckpt}.ckpt}
   seed: ${seed}
-  train: ${train}
-  test: ${test}
-  inference: ${inference_in_list}
-  loss: ${l1_loss}
-
-l1_loss:
-  module: layout_models.loss_utils.compute_L1_loss
-
-inference_in_list:
-  seed: ${seed}
-  batch_size: 5
-  num_workers: 4
-
-test:
-  seed: ${seed}
-  batch_size: 16
-  num_workers: 4
-  data: ${mvl_dataset_test}
-
-train:
-  epochs: 10
-  save_ckpt: True
-  seed: ${seed}
-  batch_size: 4
-  num_workers: 4
-  data: ${mvl_dataset_train}
-  optimizer: ${Adam_optimizer}
-  scheduler: ${ExponentialLR}
-  bn_momentum: 0
-  freeze_earlier_blocks: -1
-  save_every: -1
-
-mvl_dataset_train:
-  img_dir: TBD
-  labels_dir: TBD
-  scene_list: TBD
-  size: -1
-  seed: ${seed}
-  flip: True
-  rotate: True
-  gamma: True
-
-mvl_dataset_test:
-  img_dir: TBD
-  labels_dir: TBD
-  scene_list: TBD
-  size: -1
-  seed: ${seed}
-  flip: False
-  rotate: False
-  gamma: False
+  train: TBD 
+  test: TBD
+  inference: TBD
+  loss: TBD
 
 defaults:
   - general
   - trained_models
-  - datasets
   - _self_

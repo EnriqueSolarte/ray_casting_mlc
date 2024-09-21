@@ -1,0 +1,47 @@
+defaults:
+  - general
+  - trained_models
+  - datasets
+  - _self_
+
+hydra:
+  searchpath:
+    - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
+
+log_dir: ${get_hydra_dirname:}/logs/${date}
+dir_trained_models: /media/q200/models_weights/layout_models
+dir_datasets: /media/datasets/mvl_datasets
+
+cuda: 0
+seed: 594277
+model:
+  device: cuda:${model.cuda}
+  cuda: ${cuda}
+  ly_model: LGTNet
+  ckpt: ${trained_models.lgt_mp3d.ckpt}
+  seed: ${seed}
+  inference: ${inference_lys}
+  model_args:
+    decoder_name: 'SWG_Transformer'
+    win_size: 16
+    rpe: 'lr_parameter_mirror'
+    dropout: 0.0
+    depth: 8
+    output_name: 'LGT'
+
+dataset: hm3d_mvl
+mvl_dataset:
+  dataset_name: ${dataset}
+  img_dir: ${datasets.${dataset}.img_dir}
+  labels_dir: ${datasets.${dataset}.labels_dir}
+  geometry_info_dir: ${datasets.${dataset}.geometry_info_dir}
+  scene_list: ${datasets.${dataset}.dir}/scene_list__testing_set.json
+  size: -1
+  resolution: ${datasets.${dataset}.resolution}
+  seed: ${seed}
+
+inference_lys:
+  seed: ${seed}
+  batch_size: 5
+  num_workers: 4
+  data: ${mvl_dataset}

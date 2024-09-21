@@ -1,10 +1,20 @@
 # ! Pretrained HN models
+dir_trained_models: ???
 trained_models:
   hn_mp3d:
-    ckpt: "/media/Pluto/justin/code/360-retraining/models/HorizonNet/ckpt/resnet50_rnn__mp3d.pth"
+    ckpt: "${dir_trained_models}/horizon_net/resnet50_rnn__mp3d.pth"
   hn_zind:
-    ckpt: "/media/Pluto/justin/code/360-retraining/models/HorizonNet/ckpt/resnet50_rnn__zind.pth"
+    ckpt: "${dir_trained_models}/horizon_net/resnet50_rnn__zind.pth"
   hn_st3d:
-    ckpt: "/media/Pluto/justin/code/360-retraining/models/HorizonNet/ckpt/resnet50_rnn__st3d.pth"
+    ckpt: "${dir_trained_models}/horizon_net/resnet50_rnn__st3d.pth"
   hn_panos2d3d:
-    ckpt: "/media/Pluto/justin/code/360-retraining/models/HorizonNet/ckpt/resnet50_rnn__panos2d3d.pth"
+    ckpt: "${dir_trained_models}/horizon_net/resnet50_rnn__panos2d3d.pth"
+  # * LGT models
+  lgt_mp3d:
+    ckpt: "${dir_trained_models}/lgt_net/best_mp3d.pkl"
+  lgt_zind:
+    ckpt: "${dir_trained_models}/lgt_net/best_zind.pkl"
+  lgt_st3d:
+    ckpt: "${dir_trained_models}/lgt_net/best_st3d.pkl"
+  lgt_panos2d3d:
+    ckpt: "${dir_trained_models}/lgt_net/best_pano2d3d.pkl"

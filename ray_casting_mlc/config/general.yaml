@@ -1,5 +1,4 @@
-experiment_name: ${script}__${date}
-log_dir: ${get_hydra_dirname:}/logs/${experiment_name}
+log_dir: ${get_hydra_dirname:}/logs/
 
 hydra:
   run:
@@ -11,3 +10,4 @@ time: ${now:%H%M%S}
 hostname: ${get_hostname:}
 user: ${oc.env:USER}
 python: ${get_python_exe:}
+v: 2024-09-16
