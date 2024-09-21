@@ -214,7 +214,7 @@ class MVLDataloaderXYZ(MVLDataloaderPhiCoords):
         
         label_xyz = label_xyz[:, 0:-1:self.dilation]
         std = std[:, 0:-1:self.dilation]
-        # label = torch.FloatTensor(label_xyz.copy())
-        # std = torch.FloatTensor(std.copy())
-
-        return dict(x=x, y=(label_xyz[:3], label_xyz[3:], std, self.list_imgs[idx]))
+        
+        # Ratio ceiling wrt floor (assuming floor is at 1)
+        ratio = np.abs(np.mean(label_xyz[1]))
+        return dict(x=x, y=(label_xyz[:3], label_xyz[3:], ratio, std, self.list_imgs[idx]))

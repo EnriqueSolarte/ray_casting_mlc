@@ -119,12 +119,12 @@ def set_for_training(model: WrapperLGTNet, optimizer=None, scheduler=None):
     logging.info("LGTNet ready for training")
 
 
-def weighed_distance_loss(xyz_est, xyz_ref, std, kappa, d_min, eps=1E-6):
+def weighed_distance_loss(xyz_est, ratio_est, xyz_ref, ratio_ref, std, kappa, d_min, gamma=1, eps=1E-6):
     d_xz = torch.norm(xyz_ref[:, [0, 2]], dim=1)
     d_xz_est = torch.norm(xyz_est[:, [0, 2]], dim=1)
     w_cam = torch.exp(kappa * (d_xz-d_min))
-    w = w_cam  / (std[0]**2 + eps)
-    return F.l1_loss(d_xz_est * w, d_xz * w)
+    w = w_cam / (std[0]**2 + eps)
+    return F.l1_loss(d_xz_est * w, d_xz * w) + gamma * F.l1_loss(ratio_est, ratio_ref)
 
 
 def train_loop(model: WrapperLGTNet, dataloader, loss_function: Callable):
@@ -138,7 +138,7 @@ def train_loop(model: WrapperLGTNet, dataloader, loss_function: Callable):
     results_train = {'loss': []}
     for _ in trange(len(dataloader), desc=f"Training  "):
         dt = next(iterator_train)
-        x, (xyz_ceiling, xyz_floor, std, fn) = dt["x"], dt["y"]
+        x, (xyz_ceiling, xyz_floor, ratio, std, fn) = dt["x"], dt["y"]
 
         est = model.net(x.to(model.device))
 
@@ -151,8 +151,12 @@ def train_loop(model: WrapperLGTNet, dataloader, loss_function: Callable):
         # # est_phi_coords_floor = xyz2lonlat(est_floor_xyz)[..., -1:]
         # # est_phi_coords_ceil = xyz2lonlat(est_ceil_xyz)[..., -1:]
 
-        loss = loss_function(est_floor_xyz.transpose(
-            1, 2), xyz_floor.to(model.device), std[1].to(model.device))
+        loss = loss_function(
+            est_floor_xyz.transpose(1, 2),
+            est['ratio'],
+            xyz_floor.to(model.device),
+            ratio.reshape(est['ratio'].shape).to(model.device),
+            std[1].to(model.device))
 
         if np.isnan(loss.item()):
             logging.error(f"Loss is nan @ {fn}")

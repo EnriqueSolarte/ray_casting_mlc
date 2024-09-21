@@ -7,3 +7,5 @@ RAY_CASTING_MLC_CFG_DIR = os.path.join(RAY_CASTING_MLC_ROOT, 'config')
 
 os.environ['RAY_CASTING_MLC_ROOT'] = RAY_CASTING_MLC_ROOT
 os.environ['RAY_CASTING_MLC_CFG_DIR'] = RAY_CASTING_MLC_CFG_DIR
+
+# from .train.print_train_results import main as train_horizon_net
