@@ -57,7 +57,7 @@ def sampling_ray_casting_pseudo_label(ray_tracer: RaysTracer, xyz_cc, all_xyz_cc
             config_name="cfg.yaml")
 def main(cfg):
     logging.warning("Running script")
-    save_cfg(cfg, [__file__])
+    save_cfg(cfg, [__file__], resolve=True)
 
     dt = load_mvl_dataset(cfg.mvl_dataset)
 

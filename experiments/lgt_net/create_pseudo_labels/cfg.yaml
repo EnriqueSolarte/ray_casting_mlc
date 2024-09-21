@@ -1,3 +1,14 @@
+# *****************************************************************************
+# Usual custom configuration inputs
+cuda: 0
+seed: 1232
+ckpt: lgt_mp3d
+dataset: hm3d_mvl
+dir_pre_computed_data: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
+dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
+dir_datasets: ${oc.env:HOME}/ray_casting_mlc_data/mvl_datasets
+# *****************************************************************************
+
 defaults:
   - general
   - trained_models
@@ -9,20 +20,10 @@ hydra:
     - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
 
 # Parameters for users
-cuda: 0
-seed: 0
-dataset: hm3d_mvl #from datasets.yaml
-ckpt: lgt_mp3d #from trained_models.yaml
 dataset_code: ${ckpt}__${dataset}
-experiment_name: ${script}
 
 # * Settings Directories
-dir_trained_models: /media/q200/models_weights/layout_models
-dir_datasets: /media/datasets/mvl_datasets
-dir_ws: /media/q200/kike/ray_casting_mlc_ws
-dir_pre_computed_data: ${dir_ws}/pre_computed_data/
-output_dir: ${dir_pre_computed_data}/${experiment_name}/${dataset_code}
-
+output_dir: ${dir_pre_computed_data}/${script}/${dataset_code}
 pre_computed_data:
   dir_mlc: ${dir_pre_computed_data}/pre_compute_mlc/${dataset_code}/label
   dir_phi_coords: ${dir_pre_computed_data}/pre_compute_xyz/${dataset_code}/phi_coords

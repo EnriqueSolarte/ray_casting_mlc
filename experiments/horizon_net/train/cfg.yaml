@@ -3,7 +3,7 @@
 cuda: 0
 ckpt: hn_mp3d
 dataset: hm3d_mvl
-pre_computed_data_dir: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
+dir_pre_computed_data: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
 dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
 dir_datasets: ${oc.env:HOME}/ray_casting_mlc_data/mvl_datasets
 dir_train_results: ${oc.env:HOME}/ray_casting_mlc_data/train_results
@@ -22,12 +22,9 @@ hydra:
 
 
 # * Settings Directories
-dir_ws: /media/q200/kike/ray_casting_mlc_ws
-dir_exp: ${dir_ws}/train_results/${script}_test/${dataset_code}
-dir_ray_cast_labels: ${dir_ws}/pre_computed_data/sampling_ray_casting_pseudo_labels
-
+dir_ray_cast_labels: ${dir_pre_computed_data}/sampling_ray_casting_pseudo_labels
 dataset_code: ${ckpt}__${dataset}
-log_dir: ${dir_exp}/${date}_${time}__${wdL1.kwargs.kappa}_${wdL1.kwargs.d_min}__${seed}
+log_dir: ${dir_train_results}/${script}/${dataset_code}/${date}_${time}__${wdL1.kwargs.kappa}_${wdL1.kwargs.d_min}__${seed}
 
 # * Setting Horizon Net model
 seed: ${opt_params.${dataset}.seed}

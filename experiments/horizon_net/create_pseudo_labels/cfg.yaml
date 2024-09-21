@@ -4,7 +4,7 @@ cuda: 0
 seed: 1232
 ckpt: hn_mp3d
 dataset: hm3d_mvl
-pre_computed_data_dir: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
+dir_pre_computed_data: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
 dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
 dir_datasets: ${oc.env:HOME}/ray_casting_mlc_data/mvl_datasets
 # *****************************************************************************
@@ -40,13 +40,13 @@ mvl_dataset:
   resolution: ${datasets.${dataset}.resolution}
   seed: ${seed}
 
-output_dir: ${pre_computed_data_dir}/${script}/${dataset_code}
+output_dir: ${dir_pre_computed_data}/${script}/${dataset_code}
 log_dir: ${output_dir}/logs
 pre_computed_data:
-  dir_mlc: ${pre_computed_data_dir}/pre_compute_mlc/${dataset_code}/label
-  dir_phi_coords: ${pre_computed_data_dir}/pre_compute_xyz/${dataset_code}/phi_coords
-  dir_xyz: ${pre_computed_data_dir}/pre_compute_xyz/${dataset_code}/xyz
-  dir_n_cycle_ray_cast: ${pre_computed_data_dir}/multi_cycle_ray_casting/${dataset_code}/ray_cast_xyz
+  dir_mlc: ${dir_pre_computed_data}/pre_compute_mlc/${dataset_code}/label
+  dir_phi_coords: ${dir_pre_computed_data}/pre_compute_xyz/${dataset_code}/phi_coords
+  dir_xyz: ${dir_pre_computed_data}/pre_compute_xyz/${dataset_code}/xyz
+  dir_n_cycle_ray_cast: ${dir_pre_computed_data}/multi_cycle_ray_casting/${dataset_code}/ray_cast_xyz
   
 ray_casting_mlc:
   ray_tracer:

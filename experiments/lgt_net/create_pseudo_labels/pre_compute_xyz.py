@@ -18,7 +18,7 @@ import ray_casting_mlc
             config_name="cfg.yaml")
 def main(cfg):
     logging.warning("Running script")
-    save_cfg(cfg, [__file__])
+    save_cfg(cfg, [__file__], resolve=True)
 
     # load HN model
     model = lg.WrapperLGTNet(cfg.model)

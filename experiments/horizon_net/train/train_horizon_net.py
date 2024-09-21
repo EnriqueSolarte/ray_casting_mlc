@@ -63,9 +63,9 @@ def main(cfg):
         epoch_results = {**results_train, **results_test, **{'epoch': epoch}}
         save = update_log_results(train_log, epoch_results)
         save_json_dict(log_fn, train_log)
-        # if save:
-        #     fn = f"{cfg.log_dir}/best_model.pth"
-        #     hn.save_model(model, fn)
+        if save:
+            fn = f"{cfg.log_dir}/best_model.pth"
+            hn.save_model(model, fn)
         logging.info(f"log results @: {'/'.join(log_fn.split('/')[-4:])}")
 
 

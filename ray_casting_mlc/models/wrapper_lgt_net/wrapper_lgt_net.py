@@ -213,6 +213,10 @@ def test_loop(model, dataloader, log_results=True):
     return results_test
 
 
+def save_model(ckpt, model: WrapperLGTNet):
+    raise NotImplementedError("Not implemented")
+
+
 @torch.no_grad()
 def estimate_within_list_ly(model: WrapperLGTNet, list_ly: List[Layout]):
     """

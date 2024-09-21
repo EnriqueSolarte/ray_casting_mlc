@@ -19,7 +19,7 @@ from geometry_perception_utils.geometry_utils import extend_array_to_homogeneous
             config_name="cfg.yaml")
 def main(cfg):
     logging.warning("Running script")
-    save_cfg(cfg, [__file__])
+    save_cfg(cfg, [__file__], resolve=True)
 
     model = lg.WrapperLGTNet(cfg.model)
     lg.load_model(cfg.model.ckpt, model)
