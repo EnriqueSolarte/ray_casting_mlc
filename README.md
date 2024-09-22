@@ -50,16 +50,16 @@ pip install .
 </div>
 
 
-With the publication of this project, a new dataset called `hm3d_mvl` is also released. This dataset complements previous panorama dataset by adding multiple registered views as inputs for the task of  self-training room layout estimation. This dataset can be downloaded using the following command:
+With the publication of this project, we release a new dataset called `hm3d_mvl`. This dataset complements previous panorama datasets by adding multiple registered views as inputs for the task of  self-training room layout estimation. This dataset can be downloaded using the following command:
 
 ```bash
 # Downloading the dataset hm3d_mvl
 python experiments/download/mvl_datasets.py dataset=hm3d_mvl
 ```
-Additionally, we also provide in the same format the `mp3d-fpe-mvl` and `zind-mvl` datasets from the original projects [360-MLC](https://github.com/EnriqueSolarte/360-mlc) and [ZiND](https://github.com/zillow/zind), respectively. We named to these dataset `mvl-datasets`:
+Using the format, we also provide the `mp3d_fpe_mvl` and `zind_mvl` datasets processed from the official repositories [360-MLC](https://github.com/EnriqueSolarte/360-mlc) and [ZiND](https://github.com/zillow/zind), respectively. For convenience, we called these datasets as multi-view-layout datasets `mvl-datasets`. These datasets are public available in [**MLV-Datases** (Huggingface 🤗)](https://huggingface.co/datasets/EnriqueSolarte/mvl_datasets). To download these datasets, use the following commands:
 
 ```bash
-# Downloading the dataset hm3d_mvl
+# Downloading the dataset mp3d_fpe_mvl
 python experiments/download/mvl_datasets.py dataset=mp3d_fpe_mvl
 # Downloading the dataset zind_mvl
 python experiments/download/mvl_datasets.py dataset=zind_mvl
