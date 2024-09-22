@@ -22,3 +22,4 @@ einops
 multiview-datasets-dev @ git+https://github.com/EnriqueSolarte/multiview-datasets.git@d7b100382d0c6cbafb599092ce5c5440b26fc423
 torch==2.4.1
 torchvision==0.19.1
+huggingface_hub

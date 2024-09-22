@@ -1,0 +1,26 @@
+# *****************************************************************************
+# Usual custom configuration inputs
+# This directory is the workspace where models, datasets, pre_computed data
+# train results, etc. will be stored
+dir_ray_casting_mlc_ws: ${oc.env:HOME}/ray_casting_mlc_ws
+# *****************************************************************************
+
+defaults:
+  - general
+  - path_dirs
+  - _self_
+
+hydra:
+  searchpath:
+    - ${oc.env:RAY_CASTING_MLC_CFG_DIR}
+
+dataset: hm3d_mvl
+huggingface:
+  # You have to request access to the dataset first here
+  # https://huggingface.co/datasets/EnriqueSolarte/mvl_datasets
+  repo_id: "EnriqueSolarte/mvl_datasets"
+  revision: ${dataset} 
+  
+zip_dir: ${dir_ray_casting_mlc_ws}/zipped_data
+dir_datasets: ${dir_ray_casting_mlc_ws}/mvl_datasets
+dir_trained_models: ${dir_ray_casting_mlc_ws}/trained_models
