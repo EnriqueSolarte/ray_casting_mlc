@@ -9,10 +9,10 @@ setup(
     packages=find_packages(),
     install_requires=requirements,
     package_data={
-                  "ray-casting-mlc": ["models/**", "config/**"]
-                },
+        "ray-casting-mlc": ["models/**", "config/**"]
+    },
     author="Enrique Solarte",
     author_email="enrique.solarte.pardo@gmail.com",
-    description=("Ray casting algorithm mlc - ECCV2024"),
+    description=("Multi-cycle Ray casting algorithm MLC - ECCV2024"),
     license="BSD",
 )
