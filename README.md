@@ -42,7 +42,7 @@ pip install .
 ## Download the MLV datasets
 
 <p align="center">
-<img src="assets/mvl-dataset.gif" width=80%>
+<img src="assets/mvl-dataset-light.gif" width=80%>
 </p>
 <div align="center">
 
