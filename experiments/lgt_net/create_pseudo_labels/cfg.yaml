@@ -4,9 +4,11 @@ cuda: 0
 seed: 1232
 ckpt: lgt_mp3d
 dataset: hm3d_mvl
-dir_pre_computed_data: ${oc.env:HOME}/ray_casting_mlc_data/pre_computed_data
-dir_trained_models: ${oc.env:HOME}/ray_casting_mlc_data/trained_models
-dir_datasets: ${oc.env:HOME}/ray_casting_mlc_data/mvl_datasets
+dir_ray_casting_mlc_ws: ${oc.env:HOME}/ray_casting_mlc_ws
+# -----------------------------------------------------------------------------
+dir_pre_computed_data: ${dir_ray_casting_mlc_ws}/pre_computed_data
+dir_trained_models: ${dir_ray_casting_mlc_ws}/trained_models
+dir_datasets: ${dir_ray_casting_mlc_ws}/mvl_datasets
 # *****************************************************************************
 
 defaults:
