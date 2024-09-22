@@ -1,0 +1,6 @@
+
+dir_ray_casting_mlc_ws: ${oc.env:HOME}/ray_casting_mlc_ws
+dir_datasets: ${ray_casting_mlc_ws}/mvl_datasets
+dir_trained_models: ${ray_casting_mlc_ws}/trained_models
+dir_pre_computed_data: ${ray_casting_mlc_ws}/pre_computed_data
+dir_train_results: ${ray_casting_mlc_ws}/train_results
