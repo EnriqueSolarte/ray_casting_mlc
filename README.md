@@ -66,6 +66,13 @@ python experiments/download/mvl_datasets.py dataset=zind_mvl
 # Downloading the all mvl-datasets
 python experiments/download/mvl_datasets.py dataset=main
 ```
+## Download the pre-trained models
+
+We provide pre-trained models for [LGTNet](https://github.com/zhigangjiang/LGT-Net) and [HorizonNer](https://github.com/sunset1995/HorizonNet) models. These pretrained weights are taken from officially repositories provided by the authors.  These models can be downloaded using the following command:
+
+```bash
+python experiments/download/pre_trained_models.py
+```
 
 ## Create Pseudo-labels
 
