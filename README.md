@@ -60,7 +60,8 @@ With the publication of this project, we release a new dataset called `hm3d_mvl`
 # Downloading the dataset hm3d_mvl
 python experiments/download/mvl_datasets.py dataset=hm3d_mvl
 ```
-Using the format, we also provide the `mp3d_fpe_mvl` and `zind_mvl` datasets processed from the official repositories [360-MLC](https://github.com/EnriqueSolarte/360-mlc) and [ZiND](https://github.com/zillow/zind), respectively. For convenience, we called these datasets as multi-view-layout datasets `mvl-datasets`. These datasets are public available in [**MLV-Datases** (Huggingface 🤗)](https://huggingface.co/datasets/EnriqueSolarte/mvl_datasets). To download these datasets, use the following commands:
+You can also download the `mp3d_fpe_mvl` and `zind_mvl` datasets processed from the official repositories [360-MLC](https://github.com/EnriqueSolarte/360-mlc) and [ZiND](https://github.com/zillow/zind), respectively. For convenience, we called these datasets multi-view-layout datasets `mvl-datasets`. These datasets are public available in [**MLV-Datases** (Huggingface 🤗)](https://huggingface.co/datasets/EnriqueSolarte/mvl_datasets). For more information, you can see also [multi-view datasets pkg](https://github.com/EnriqueSolarte/multiview-datasets).
+
 
 ```bash
 # Downloading the dataset mp3d_fpe_mvl
@@ -115,6 +116,7 @@ For the `hm3d-mvl` dataset and `Multi-cycle ray-casting` please cite the followi
 @article{solarte2024_ray_casting_mlc,
     title   ={Self-training Room Layout Estimation via Geometry-aware Ray-casting}, 
     author  ={Bolivar Solarte and Chin-Hsuan Wu and Jin-Cheng Jhang and Jonathan Lee and Yi-Hsuan Tsai and Min Sun},
+    journal ={European Conference on Computer Vision (ECCV)},
     year    ={2024},
     url     ={https://arxiv.org/abs/2407.15041}, 
 }
