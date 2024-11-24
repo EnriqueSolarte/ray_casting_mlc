@@ -9,7 +9,7 @@ setup(
     packages=find_packages(),
     install_requires=requirements,
     package_data={
-        "ray-casting-mlc": ["models/**", "config/**"]
+        "ray_casting_mlc": ["models/HorizonNet/**", "models/LGTNet/**", "config/**"]
     },
     author="Enrique Solarte",
     author_email="enrique.solarte.pardo@gmail.com",
