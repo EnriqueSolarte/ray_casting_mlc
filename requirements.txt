@@ -15,11 +15,11 @@ scikit-image
 open3d
 hydra-core
 opencv-python-headless
-360_mlc @ git+https://github.com/EnriqueSolarte/360-mlc.git@e5e55db907600e811ff0ebf64a2ec63b67098719
-geometry-perception-utils-dev @ git+https://github.com/EnriqueSolarte/geometry_perception_utils.git@570039d48711ce37577cde4776f99ce927fa90eb
+360_mlc @ git+https://github.com/EnriqueSolarte/360-mlc.git@v1.0.0
+geometry-perception-utils-dev @ git+https://github.com/EnriqueSolarte/geometry_perception_utils.git@v1.0.24.11.04
 shapely==2.0.6
 einops
-multiview-datasets-dev @ git+https://github.com/EnriqueSolarte/multiview-datasets.git@d7b100382d0c6cbafb599092ce5c5440b26fc423
+multiview-datasets-dev @ git+https://github.com/EnriqueSolarte/multiview-datasets.git@v1.0.24.11.24
 torch==2.4.1
 torchvision==0.19.1
 huggingface_hub
