@@ -33,9 +33,13 @@ For reproducibility, we recommend creating a workspace directory where the datas
 
 ```bash
 mkdir -p ${HOME}/ray_casting_mlc_ws
+
 cd ${HOME}/ray_casting_mlc_ws
 git clone https://github.com/EnriqueSolarte/ray_casting_mlc
 cd ray_casting_mlc
+
+# To bring the registered submodules HorizonNet and LGTNet from the original implementations
+git submodule update --init --recursive
 pip install . 
 ```
 
