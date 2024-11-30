@@ -34,8 +34,15 @@ def unzip_data(cfg):
     exclude = [".cache", '.gitattributes']
     list_dataset = [f for f in os.listdir(cfg.zip_dir) if f not in exclude]
     for dataset in list_dataset:
-        data_dir = create_directory(
-            f"{cfg.dir_datasets}/{dataset}", delete_prev=False)
+        
+        if os.path.exists(f"{cfg.dir_datasets}/{dataset}"):
+            logging.warning(f"The directory {cfg.dir_datasets}/{dataset} already exist!")
+            k = input("Please enter 'delete' to delete this directory or any key to skip... >> ")
+            if k == 'delete':
+                data_dir = create_directory(
+                    f"{cfg.dir_datasets}/{dataset}", delete_prev=True)
+            else:
+                continue        
         logging.info(f"Unzipping data to {data_dir}")
 
         # copy scene_lists
@@ -47,7 +54,7 @@ def unzip_data(cfg):
 
         for zip_file in tqdm(list_zip_files, desc="Unzipping files"):
             logging.info(f"Unzipping {zip_file}")
-            os.system(f"unzip {zip_file} -d {data_dir}")
+            os.system(f"unzip -o {zip_file} -d {data_dir}")
         logging.info("Unzipping completed")
 
 
