@@ -5,7 +5,7 @@ with open("./requirements.txt", "r") as f:
 
 setup(
     name="ray-casting-mlc",
-    version="1.0",
+    version="1.0.0",
     packages=find_packages(),
     install_requires=requirements,
     package_data={
