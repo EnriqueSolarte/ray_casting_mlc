@@ -213,8 +213,9 @@ def test_loop(model, dataloader, log_results=True):
     return results_test
 
 
-def save_model(ckpt, model: WrapperLGTNet):
-    raise NotImplementedError("Not implemented")
+def save_model(model: WrapperLGTNet, ckpt_path):
+    torch.save(model.net.state_dict(), ckpt_path)
+    logging.info(f"Saved model: {ckpt_path}")
 
 
 @torch.no_grad()
